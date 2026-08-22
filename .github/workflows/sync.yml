@@ -41,10 +41,10 @@ jobs:
       fail-fast: false
       matrix:
         repo:
-          - faa-drone-test-training
-          - fcc-commercial-test-training
-          - nc-cdl-test-training
-          - nc-pesticide-test-training
+          - faa-drone-trainer
+          - fcc-commercial-trainer
+          - nc-cdl-trainer
+          - nc-pesticide-trainer
     steps:
       - name: Checkout engine
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

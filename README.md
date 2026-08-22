@@ -2,10 +2,10 @@
 
 The shared engine behind the ullbergm exam-trainer PWAs:
 
-- [faa-drone-test-training](https://github.com/ullbergm/faa-drone-test-training) — FAA Part 107 remote pilot
-- [fcc-commercial-test-training](https://github.com/ullbergm/fcc-commercial-test-training) — FCC commercial radio operator
-- [nc-cdl-test-training](https://github.com/ullbergm/nc-cdl-test-training) — NC commercial driver's license
-- [nc-pesticide-test-training](https://github.com/ullbergm/nc-pesticide-test-training) — NC pesticide applicator
+- [faa-drone-trainer](https://github.com/ullbergm/faa-drone-trainer) — FAA Part 107 remote pilot
+- [fcc-commercial-trainer](https://github.com/ullbergm/fcc-commercial-trainer) — FCC commercial radio operator
+- [nc-cdl-trainer](https://github.com/ullbergm/nc-cdl-trainer) — NC commercial driver's license
+- [nc-pesticide-trainer](https://github.com/ullbergm/nc-pesticide-trainer) — NC pesticide applicator
 
 Each app is a no-build static PWA. The engine is everything exam-agnostic:
 the study/exam/stats UI (`js/app.js`), the FSRS scheduler (`js/fsrs.js`),
