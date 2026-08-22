@@ -1,0 +1,63 @@
+# Opens a sync PR in every app repo whenever an engine file changes on main.
+# Each PR carries the exact files in MANIFEST and runs the app's own CI
+# (bank validation, unit tests, browser suite) before it can merge, so an app
+# can lag safely and a breaking engine change surfaces in the PR, not on the
+# live site.
+#
+# Needs a classic PAT with `repo` scope saved as the SYNC_TOKEN secret, so the
+# pushed branches trigger the app repos' workflows (the default GITHUB_TOKEN
+# cannot reach other repos).
+name: sync-apps
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        repo:
+          - faa-drone-test-training
+          - fcc-commercial-test-training
+          - nc-cdl-test-training
+          - nc-pesticide-test-training
+    steps:
+      - name: Checkout engine
+        uses: actions/checkout@v4
+        with:
+          path: engine
+
+      - name: Checkout ${{ matrix.repo }}
+        uses: actions/checkout@v4
+        with:
+          repository: ullbergm/${{ matrix.repo }}
+          token: ${{ secrets.SYNC_TOKEN }}
+          path: app
+
+      - name: Copy manifest files
+        run: |
+          cd engine
+          grep -v '^#' MANIFEST | while read -r f; do
+            [ -n "$f" ] || continue
+            mkdir -p "../app/$(dirname "$f")"
+            cp "$f" "../app/$f"
+          done
+
+      - name: Open sync PR
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.SYNC_TOKEN }}
+          path: app
+          branch: engine-sync
+          commit-message: 'fix: sync trainer-engine ${{ github.sha }}'
+          title: 'Sync trainer-engine'
+          body: |
+            Automated sync of the shared engine files from
+            ullbergm/trainer-engine@${{ github.sha }}.
+
+            Merge once this repo's CI is green. See the engine repo's
+            MANIFEST for what is synced.

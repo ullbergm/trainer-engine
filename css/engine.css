@@ -1,0 +1,467 @@
+/* Trainer engine styles: everything structural, themed entirely through the
+   CSS custom properties that css/app.css defines. An app carries no
+   structural CSS of its own — it sets the tokens (colors, shadow, the
+   --track-texture drawn on the progress bar) and any styles for markup its
+   own modules render. Synced from the trainer-engine repo; do not edit in an
+   app repo. */
+* { box-sizing: border-box; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+nav :focus-visible { outline-color: var(--accent2); }
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+main { max-width: 720px; margin: 0 auto; padding: 20px 16px 64px; }
+
+/* nav: themed strip under the accent tokens */
+nav {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+  padding: 10px 14px 5px;
+  border-bottom: 3px solid var(--accent2);
+  overflow-x: auto;
+  scrollbar-width: none;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  /* The first two layers scroll with the content and park over the fades at
+     each end, so a fade only shows on a side there is more nav to scroll to. */
+  background-color: var(--nav-bg);
+  background-image:
+    linear-gradient(to right, var(--nav-bg), var(--nav-bg)),
+    linear-gradient(to left, var(--nav-bg), var(--nav-bg)),
+    linear-gradient(to right, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0)),
+    linear-gradient(to left, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0));
+  background-position: left center, right center, left center, right center;
+  background-size: 20px 100%, 20px 100%, 20px 100%, 20px 100%;
+  background-repeat: no-repeat;
+  background-attachment: local, local, scroll, scroll;
+}
+nav::-webkit-scrollbar { display: none; }
+nav .brand {
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  color: #ffffff;
+  padding: 6px 8px 11px 2px;
+  white-space: nowrap;
+}
+nav a {
+  color: var(--nav-text);
+  text-decoration: none;
+  font: inherit;
+  font-weight: 600;
+  padding: 6px 10px 8px;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  opacity: 0.85;
+}
+nav a.active { color: #ffffff; border-bottom-color: var(--accent2); opacity: 1; }
+nav a:not(.active):hover {
+  color: #ffffff;
+  border-bottom-color: rgba(255, 255, 255, 0.35);
+  opacity: 1;
+}
+
+h1 { margin: 8px 0 0; }
+h2 { margin: 12px 0 8px; font-weight: 800; letter-spacing: -0.01em; }
+.sub { color: var(--muted); margin-top: 4px; }
+
+/* buttons: base first, variants after, so variants actually win */
+/* button.btn is the hook for app-module markup (an extra view's buttons pick
+   up the shared styling by carrying the class rather than by this list
+   growing a selector per app) */
+.actions button, .grades button, .done button, .examresult button, #feedback > button,
+button.btn {
+  font: inherit;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+  margin: 4px 6px 0 0;
+  box-shadow: var(--shadow);
+}
+button.primary {
+  background: var(--accent);
+  color: var(--accent-text);
+  border-color: var(--accent);
+}
+button.primary:hover { background: var(--accent-hi); border-color: var(--accent-hi); }
+button.danger { border-color: var(--bad); color: var(--bad); background: transparent; box-shadow: none; }
+.actions button:disabled, button.btn:disabled { opacity: 0.45; cursor: default; box-shadow: none; }
+
+/* exam banner: accent2 strip */
+.exambanner {
+  margin: 12px 0 0;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: var(--accent2);
+  color: var(--accent2-text);
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+  display: inline-block;
+  box-shadow: var(--shadow);
+}
+.hint { color: var(--muted); font-size: 0.85rem; max-width: 48em; }
+.disclaimer a { color: var(--accent); }
+.disclaimer {
+  color: var(--muted);
+  font-size: 0.8rem;
+  max-width: 48em;
+  margin-top: 28px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+/* stat tiles: mile-marker panels */
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin: 16px 0; }
+.tile {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--accent);
+  border-radius: 12px;
+  padding: 12px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.tile > div:last-child {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.tile .big {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+/* quiz */
+.quiz .meta { display: flex; gap: 10px; align-items: center; color: var(--muted); font-size: 0.9rem; }
+.quiz .section { margin-left: auto; text-transform: uppercase; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; }
+.badge {
+  padding: 2px 10px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.badge.new { background: var(--accent2); color: var(--accent2-text); }
+.badge.review { background: var(--ok-bg); color: var(--ok); }
+.badge.relearn { background: var(--bad-bg); color: var(--bad); }
+
+/* progress: the app's optional --track-texture over the dark track */
+.progress {
+  height: 10px;
+  border-radius: 6px;
+  margin: 12px 0 6px;
+  background:
+    var(--track-texture)
+    center / 100% 2px no-repeat,
+    var(--surface-dark);
+  overflow: hidden;
+}
+.progress div {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 6px 3px 3px 6px;
+  transition: width 0.2s;
+}
+
+.qtext { font-size: 1.2rem; line-height: 1.4; }
+.choices { display: grid; gap: 8px; }
+.choice {
+  font: inherit;
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+  box-shadow: var(--shadow);
+}
+.choice:hover:not(:disabled) { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent), var(--shadow); }
+.choice.correct { border-color: var(--ok); background: var(--ok-bg); box-shadow: inset 3px 0 0 var(--ok); }
+.choice.wrong { border-color: var(--bad); background: var(--bad-bg); box-shadow: inset 3px 0 0 var(--bad); }
+.choice:disabled { cursor: default; }
+
+/* keyboard hints: signage chips; only on fine-pointer devices */
+kbd {
+  display: none;
+  font-family: inherit;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 3px 6px;
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: var(--bg);
+  color: var(--muted);
+  margin-right: 9px;
+  vertical-align: 1px;
+}
+kbd.after { margin: 0 0 0 9px; }
+.primary kbd {
+  background: transparent;
+  border-color: currentColor;
+  color: inherit;
+  opacity: 0.8;
+}
+@media (hover: hover) and (pointer: fine) {
+  kbd { display: inline-block; }
+}
+
+.explain { margin: 14px 0; padding: 12px 14px; border-radius: 10px; border: 1px solid transparent; }
+.explain.okbg { background: var(--ok-bg); border-color: color-mix(in srgb, var(--ok) 25%, transparent); }
+.explain.wrongbg { background: var(--bad-bg); border-color: color-mix(in srgb, var(--bad) 25%, transparent); }
+.cite { color: var(--muted); font-size: 0.85rem; white-space: nowrap; }
+a.cite:hover { color: var(--accent); }
+a.report { color: var(--muted); font-size: 0.85rem; white-space: nowrap; }
+a.report:hover { color: var(--accent); }
+.grades { display: flex; gap: 8px; }
+.grades button small { display: block; color: inherit; opacity: 0.7; font-weight: 400; }
+
+.done { text-align: center; padding: 48px 0; }
+
+/* "extra new cards today" row on home / caught-up / session-complete */
+.extra {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 20px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.done .extra { justify-content: center; }
+.extra button {
+  font: inherit;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+  box-shadow: var(--shadow);
+}
+.extra button:hover { border-color: var(--accent); }
+
+/* exam */
+.examlist { display: grid; gap: 8px; }
+.examopt {
+  font: inherit;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+  box-shadow: var(--shadow);
+}
+.examopt:hover:not(:disabled) { border-color: var(--accent); }
+.examopt:disabled { opacity: 0.45; cursor: default; }
+.examopt span { color: var(--muted); font-size: 0.85rem; }
+.pass { color: var(--ok); }
+.fail { color: var(--bad); }
+.examresult h2 {
+  display: inline-block;
+  font-size: 1.6rem;
+  letter-spacing: 0.04em;
+  padding: 6px 18px;
+  border: 3px solid currentColor;
+  border-radius: 10px;
+  text-transform: uppercase;
+}
+.missitem { background: var(--card); border: 1px solid var(--border); border-left: 4px solid var(--bad); border-radius: 10px; padding: 10px 12px; margin: 8px 0; }
+.missitem .you { color: var(--bad); font-size: 0.9rem; }
+.missitem .ans { color: var(--ok); font-size: 0.9rem; }
+.missitem .ex { color: var(--muted); font-size: 0.9rem; margin-top: 4px; }
+
+/* browse */
+.browse details { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; margin: 6px 0; box-shadow: var(--shadow); }
+.browse summary { cursor: pointer; font-weight: 600; }
+.browse .qrow { border: none; border-top: 1px solid var(--border); border-radius: 0; margin: 0; padding: 6px 0; box-shadow: none; }
+.browse .qrow summary { font-weight: 400; }
+.browse .qrow small { color: var(--muted); }
+.qdetail { padding: 6px 0 4px 12px; color: var(--muted); }
+.qdetail strong { color: var(--ok); }
+
+/* stats */
+table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin: 8px 0 16px; box-shadow: var(--shadow); }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+tr:last-child td { border-bottom: none; }
+th { color: var(--muted); font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; }
+td { font-variant-numeric: tabular-nums; }
+.stats h3 small { color: var(--muted); font-weight: 400; font-size: 0.8rem; }
+.history { display: flex; gap: 2px; align-items: flex-end; height: 64px; margin: 8px 0 2px; }
+.history .hbar {
+  flex: 1;
+  background: linear-gradient(180deg, var(--accent-hi), var(--accent));
+  border-radius: 3px 3px 0 0;
+  min-height: 2px;
+}
+.history .hbar.zero { background: var(--border); }
+.histlabels {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  color: var(--muted);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.forecast { display: flex; gap: 8px; align-items: flex-end; margin: 8px 0 16px; }
+.fcol { text-align: center; flex: 1; }
+.fbar { background: linear-gradient(180deg, var(--accent-hi), var(--accent)); border-radius: 4px 4px 0 0; min-height: 2px; }
+.fnum { font-size: 0.85rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.flab { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* exam readiness: projected score per test, with the 80% pass mark on the bar */
+.readiness { margin: 20px 0 4px; }
+.readiness h3 { margin-bottom: 10px; }
+.rrow { display: grid; grid-template-columns: minmax(80px, 34%) 1fr 3.4em; gap: 10px; align-items: center; margin: 7px 0; }
+.rname { font-size: 0.9rem; }
+.rbar { position: relative; height: 12px; background: var(--border); border-radius: 6px; overflow: hidden; }
+.rfill { height: 100%; background: linear-gradient(90deg, var(--accent-hi), var(--accent)); border-radius: 6px; }
+.rfill.low { background: var(--warn); }
+.rmark { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--text); opacity: 0.5; }
+.rpct { font-size: 0.9rem; font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; }
+
+/* new-version toast */
+.toast {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 18px;
+  z-index: 10;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--surface-dark);
+  color: #ffffff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+}
+.toast button {
+  font: inherit;
+  font-weight: 600;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent2);
+  color: var(--accent2-text);
+  cursor: pointer;
+}
+
+body > footer {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.75rem;
+  padding: 8px 0 24px;
+}
+body > footer a { color: var(--muted); }
+body > footer a:hover { color: var(--accent); }
+#version:not(:empty)::after { content: " · "; }
+
+/* about */
+.about p { max-width: 48em; }
+.about a { color: var(--accent); }
+.about h3 small { color: var(--muted); font-weight: 400; font-size: 0.8rem; }
+.about ul { margin: 4px 0; padding-left: 22px; }
+.changelog {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 4px 16px 12px;
+  max-width: 48em;
+  box-shadow: var(--shadow);
+}
+.changelog h4 { margin: 14px 0 4px; }
+.changelog h5 {
+  margin: 8px 0 2px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* settings */
+.settings label { display: block; margin: 8px 0; }
+.settings input[type="number"], .settings input[type="date"], .settings select {
+  font: inherit; margin-left: 8px;
+  background: var(--card); color: var(--text);
+  border: 1px solid var(--border); border-radius: 8px; padding: 6px 8px;
+}
+.settings input[type="number"] { width: 80px; }
+.settings label button {
+  font: inherit; margin-left: 8px; padding: 6px 12px; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer;
+}
+.settings label button:disabled { opacity: 0.45; cursor: default; }
+.settings input[type="checkbox"] { accent-color: var(--accent); }
+.seclist { display: flex; flex-direction: column; gap: 6px; }
+.seclist h4 { margin: 12px 0 2px; color: var(--muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; }
+.seclist h4:first-child { margin-top: 4px; }
+.seccheck { display: flex; align-items: baseline; gap: 8px; }
+.seccheck small { color: var(--muted); }
+
+/* The mistake behind the choice actually picked (a question's optional
+   whyWrong entry), ahead of the explanation that teaches the rule. Coloured
+   like the wrong answer it names, so the eye lands on the diagnosis first. */
+.slip { color: var(--bad); font-style: normal; font-weight: 600; }
+.missitem .slip { font-weight: 500; }
+
+/* Browse/Stats grouping: an exam's sections, with the totals on the summary
+   line so they read without expanding. The group is the frame; the sections
+   nest flat inside it so the two levels do not stack borders and shadows. */
+.group > summary { font-size: 1.02rem; }
+.group > summary small { color: var(--muted); font-weight: 400; margin-left: 6px; }
+.browse .group { padding: 10px 14px; }
+.browse .group > .chapter { background: transparent; border: none; border-top: 1px solid var(--border);
+  border-radius: 0; box-shadow: none; margin: 0; padding: 8px 0 8px 10px; }
+.browse .group > .chapter:first-of-type { margin-top: 6px; }
+.stats .group { background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+  padding: 8px 12px; margin: 6px 0; box-shadow: var(--shadow); }
+.stats .group > summary { cursor: pointer; font-weight: 600; }
+.stats .group table { box-shadow: none; margin-bottom: 4px; }
+
+/* Wide tables scroll inside their own box rather than pushing the page
+   sideways on a phone. */
+.table-scroll { overflow-x: auto; }
+
+/* About extras: sources, per-exam coverage, and the config-driven license
+   reference table. All render only when the exam config asks for them. */
+.about h4 { margin: 18px 0 4px; font-size: 0.95rem; }
+.licenses { min-width: 40em; margin-top: 4px; }
+.licenses td { font-variant-numeric: normal; font-size: 0.9rem; vertical-align: top; }
+.licenses td:first-child { min-width: 12em; }
+.coverage td { font-variant-numeric: tabular-nums; }
+.coverage tr.empty td { color: var(--muted); }
+.sources { max-width: 48em; }
+.sources li { margin-bottom: 4px; }
+.categories { columns: 2; column-gap: 24px; max-width: 48em; }
+@media (max-width: 560px) { .categories { columns: 1; } }
+
+/* An exam with nothing written for it is listed but visibly not on offer. */
+.seccheck.empty { opacity: 0.55; }
+.examopt.empty { opacity: 0.6; }

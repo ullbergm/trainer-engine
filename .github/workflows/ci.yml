@@ -1,0 +1,21 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run lint
+      # The engine has no data/ of its own, so bank validation and the
+      # browser suite run in the app repos' CI on each sync PR; here only the
+      # self-contained unit tests run.
+      - run: npm test

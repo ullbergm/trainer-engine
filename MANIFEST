@@ -1,0 +1,17 @@
+# Files synced verbatim into every app repo. One path per line, same path on
+# both sides. The sync workflow copies exactly this list; a file an app must
+# own (index.html, css/app.css, data/*, tests/test.html, tests/app-suite.js,
+# eslint.config.mjs, package.json) is never listed here.
+js/app.js
+js/fsrs.js
+js/readiness.js
+js/storage.js
+css/engine.css
+sw.js
+tests/validate-bank.js
+tests/fsrs-test.js
+tests/readiness-test.js
+tests/plant-session.js
+tests/engine-suite.js
+tests/run-browser.sh
+tools/gen-icons.sh

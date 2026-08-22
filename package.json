@@ -1,0 +1,15 @@
+{
+  "name": "trainer-engine",
+  "private": true,
+  "description": "Shared engine for the ullbergm exam-trainer PWAs: spaced-repetition study UI, FSRS scheduler, readiness projection, storage, service worker, structural CSS, and the shared test suites",
+  "license": "MIT",
+  "scripts": {
+    "lint": "eslint",
+    "test": "node tests/fsrs-test.js && node tests/readiness-test.js"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10",
+    "eslint": "^10",
+    "globals": "^17"
+  }
+}
