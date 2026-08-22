@@ -1,0 +1,27 @@
+name: Bug report
+description: Something in the shared engine is broken
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did and what went wrong.
+    validations:
+      required: true
+  - type: input
+    id: app
+    attributes:
+      label: Which trainer
+      description: The app where you saw it, or "engine checkout" if you were working here.
+      placeholder: faa-drone, fcc-commercial, nc-cdl, nc-pesticide
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and device
+      placeholder: Firefox 142 on Android
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else
+      description: Screenshots, console errors, or an exported progress file if relevant.
