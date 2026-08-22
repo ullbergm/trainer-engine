@@ -1,0 +1,80 @@
+name: Commit conventions
+
+# release-please builds the changelog from the commits on a branch, so two
+# things have to hold. The commit messages must be conventional, because that
+# is the only input it reads. The pull request title must not be, because
+# GitHub copies the title into the merge commit and release-please would count
+# the change twice.
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: commit-conventions-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  pr-title:
+    name: Title is plain prose
+    runs-on: ubuntu-latest
+    steps:
+      # Both bots title their pull requests conventionally on purpose, and
+      # neither can duplicate a changelog entry: release-please does not fold
+      # its own pull request into the next release, and dependabot only ever
+      # writes `chore`. The exemption sits on the step rather than the job so
+      # that the job still reports a result, which a required check needs.
+      - name: Reject a conventional commit prefix
+        if: >-
+          github.event.pull_request.head.ref != 'release-please--branches--main' &&
+          !startsWith(github.event.pull_request.head.ref, 'dependabot/')
+        env:
+          # Read through the environment, never interpolated into the script
+          # below: the title is attacker controlled on a fork pull request.
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          types='build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test'
+          if printf '%s' "$TITLE" | grep -qiE "^($types)(\([^)]*\))?!?:"; then
+            echo "::error::Pull request titles must be plain prose, not Conventional Commits."
+            echo "Title: $TITLE"
+            echo
+            echo "GitHub copies this title into the merge commit, where release-please"
+            echo "reads it as a second commit and lists the change twice in the changelog."
+            echo "Put the prefix on the branch commits instead, and retitle this pull"
+            echo "request as a sentence, for example:"
+            echo
+            echo "  Clamp the review interval to the exam date"
+            echo
+            echo "See the commits and releases section of CONTRIBUTING.md."
+            exit 1
+          fi
+          echo "Title is plain prose: $TITLE"
+
+  commit-messages:
+    name: Commits are conventional
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: ${{ !startsWith(github.event.pull_request.head.ref, 'dependabot/') }}
+        with:
+          # commitlint walks the range between the base and the head, so the
+          # default shallow clone is not enough.
+          fetch-depth: 0
+
+      # No config file in the repository, so this falls back to
+      # config-conventional, which is the spec CONTRIBUTING.md points at.
+      #
+      # Dependabot writes a valid subject but pastes release notes into the
+      # body, which trips the line length rule. Its commits are generated, so
+      # there is nothing for a human to fix. As above, the exemption sits on the
+      # steps so the job still reports a result for a required check.
+      - uses: wagoid/commitlint-github-action@b948419dd99f3fd78a6548d48f94e3df7f6bf3ed # v6.2.1
+        if: ${{ !startsWith(github.event.pull_request.head.ref, 'dependabot/') }}
+        with:
+          helpURL: ${{ github.server_url }}/${{ github.repository }}/blob/main/CONTRIBUTING.md#commits-and-releases
