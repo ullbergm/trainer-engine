@@ -29,6 +29,15 @@ const TestSuite = (() => {
     `${(EXAM_CONFIG.flatSections ? 'default' : x.manual) || 'default'}:${x.section}`;
   const normSec = s => (typeof s === 'number' ? `default:${s}` : String(s));
 
+  // Some banks (the FCC pools) repeat a stem with different choices, so
+  // identify the on-screen question by its stem and the choice text behind
+  // each button (each <kbd> badge is a single leading character to strip).
+  const bankOnScreen = () => {
+    const qt = q('.qtext').textContent;
+    return QUESTION_BANK.find(x => x.question === qt
+      && qa('.choice').every(b => x.choices[Number(b.dataset.i)] === b.textContent.slice(1)));
+  };
+
   run(() => {
     const TESTS = EXAM_CONFIG.tests
       .map(tst => ({ ...tst, sections: (tst.sections || []).map(normSec) }));
@@ -63,7 +72,7 @@ const TestSuite = (() => {
     nav('study');
     t('study renders question', !!q('.qtext'));
     const qid1 = q('.qtext').textContent;
-    const bank1 = QUESTION_BANK.find(x => x.question === qid1);
+    const bank1 = bankOnScreen();
     const correctBtn = qa('.choice').find(b => Number(b.dataset.i) === bank1.answer);
     correctBtn.click();
     t('correct answer highlighted', correctBtn.classList.contains('correct'));
@@ -77,8 +86,7 @@ const TestSuite = (() => {
       mirrored && mirrored.mode === 'study' && mirrored.pos === 1 && Array.isArray(mirrored.queue));
 
     // --- answer wrongly: requeue + explanation ---
-    const qtext2 = q('.qtext').textContent;
-    const bank2 = QUESTION_BANK.find(x => x.question === qtext2);
+    const bank2 = bankOnScreen();
     const progressBefore = parseFloat(q('.progress div').style.width);
     const wrongBtn = qa('.choice').find(b => Number(b.dataset.i) !== bank2.answer);
     const noCalc = !q('#calc');
@@ -117,7 +125,7 @@ const TestSuite = (() => {
 
     // --- undo takes back an answer from the feedback screen ---
     const qtext3 = q('.qtext').textContent;
-    const bank3 = QUESTION_BANK.find(x => x.question === qtext3);
+    const bank3 = bankOnScreen();
     const cardBefore = JSON.stringify(Store.load().cards[bank3.id] || null);
     const dailyBefore = JSON.stringify(Store.load().daily);
     const logBefore = Store.load().log.length;
@@ -134,8 +142,7 @@ const TestSuite = (() => {
     t('undo gone after grading finalizes the answer', !q('#undo'));
 
     // --- leaving mid-grade rolls the ungraded answer back ---
-    const qtext4 = q('.qtext').textContent;
-    const bank4 = QUESTION_BANK.find(x => x.question === qtext4);
+    const bank4 = bankOnScreen();
     const daily4 = JSON.stringify(Store.load().daily);
     qa('.choice').find(b => Number(b.dataset.i) === bank4.answer).click();
     nav('home'); // grades were showing; navigating away abandons the answer
@@ -249,21 +256,26 @@ const TestSuite = (() => {
     nav('settings');
     t('picker state survives re-render', qa('input[data-test]:checked').length === keepTests.length);
     nav('study');
-    const sq = QUESTION_BANK.find(x => x.question === q('.qtext').textContent);
+    const sq = bankOnScreen();
     t('study draws from selected sections only', keepSecs.includes(secKey(sq)));
     nav('exam');
     // Offered: the exams picked in Settings, plus the ones with no questions,
-    // which are listed unselectable so the gap shows. Keyed by exam and not
-    // by whether the kept sections happen to cover it, so an exam whose
-    // material is a subset of another's is not volunteered to someone who
-    // never picked it.
-    const availExams = EXAM_CONFIG.exams
-      .filter(e => !e.sections.length || keep.has(e.key)).length;
+    // which are listed unselectable so the gap shows. An exam sharing its key
+    // with a test follows the picker (an exam whose material is a subset of
+    // another's is not volunteered to someone who never picked it); an exam
+    // keyed on its own (the FCC elements sit behind several licenses) is
+    // offered when the kept tests cover its sections.
+    const testKeySet = new Set(TESTS.map(tst => tst.key));
+    const keepSecSet = new Set(keepSecs);
+    const offered = e => {
+      const secs = (e.sections || []).map(normSec);
+      return !secs.length || (testKeySet.has(e.key) ? keep.has(e.key)
+        : secs.every(sec => keepSecSet.has(sec)));
+    };
+    const availExams = EXAM_CONFIG.exams.filter(offered).length;
     t('exam list filtered to selected tests', qa('.examopt').length === availExams);
-    t('only picked exams with questions are offered', qa('.examopt').every(b => {
-      const e = EXAM_CONFIG.exams.find(x => x.key === b.dataset.key);
-      return !e.sections.length || keep.has(e.key);
-    }));
+    t('only offered exams are listed', qa('.examopt').every(b =>
+      offered(EXAM_CONFIG.exams.find(x => x.key === b.dataset.key))));
     t('hidden exams hint shows', availExams === EXAM_CONFIG.exams.length
       || /hidden/.test(q('.examsetup').textContent));
     nav('settings');
@@ -294,7 +306,7 @@ const TestSuite = (() => {
 
     finalBtn.click();
     t('final review renders question', !!q('.qtext'));
-    const fq = QUESTION_BANK.find(x => x.question === q('.qtext').textContent);
+    const fq = bankOnScreen();
     qa('.choice').find(b => Number(b.dataset.i) === fq.answer).click();
     t('final review grades appear', qa('.grades button').length === 3);
     q('.grades button[data-r="4"]').click(); // Easy
@@ -394,12 +406,28 @@ const TestSuite = (() => {
     // have to show the exam's sections as they are today, not as the backup
     // listed them.
     const secName = sec => QUESTION_BANK.find(x => secKey(x) === sec).sectionName;
-    const oldTest = STUDIABLE[0];
+    // Prefer a section that does not sit on every studiable test, so the
+    // migration has something narrower than "all of them" to recover; a
+    // config whose every section is shared by every test (none known) can
+    // only migrate to the empty everything-selection, and the assertion
+    // accepts that.
+    const touching = sec => STUDIABLE.filter(tst => tst.sections.includes(sec));
+    let oldTest = STUDIABLE[0];
+    let oldSec = oldTest.sections[0];
+    outer: for (const tst of STUDIABLE) {
+      for (const sec of tst.sections) {
+        if (touching(sec).length < STUDIABLE.length) { oldTest = tst; oldSec = sec; break outer; }
+      }
+    }
     Store.importJSON(JSON.stringify({
-      cards: {}, settings: { sections: oldTest.sections.slice(0, 1) },
+      cards: {}, settings: { sections: [oldSec] },
     }));
-    t('a pre-v2 section list migrates to the exam it stood for',
-      Store.load().settings.tests.includes(oldTest.key));
+    const migrated = Store.load().settings.tests;
+    t('a pre-v2 section list migrates to the exams it stood for',
+      touching(oldSec).length === STUDIABLE.length
+        ? migrated.length === 0
+        : migrated.includes(oldTest.key)
+          && migrated.every(k => touching(oldSec).some(tst => tst.key === k)));
     nav('stats');
     const statsText = q('.stats').textContent;
     t('a migrated selection covers the exam\'s sections as they are now',
@@ -432,7 +460,7 @@ const TestSuite = (() => {
     t('home counts only the outstanding miss', toFix() === 1);
     const drill = () => {
       nav('misses');
-      const bank = QUESTION_BANK.find(x => x.question === q('.qtext').textContent);
+      const bank = bankOnScreen();
       qa('.choice').find(b => Number(b.dataset.i) === bank.answer).click();
       q('#next').click();
     };

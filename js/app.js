@@ -891,11 +891,18 @@
     const counts = {};
     QUESTION_BANK.forEach(q => { counts[secKey(q)] = (counts[secKey(q)] || 0) + 1; });
     // Offered: the exams picked in Settings, plus the ones the bank has
-    // nothing for yet, which are listed unselectable so the gap shows. Keyed
-    // by exam rather than by whether the studied sections happen to cover it,
-    // for the reason readinessRows gives.
+    // nothing for yet, which are listed unselectable so the gap shows. An
+    // exam that shares its key with a test follows the picker directly —
+    // keyed by exam rather than by whether the studied sections happen to
+    // cover it, for the reason readinessRows gives. An exam keyed on its own
+    // (the FCC elements sit behind several licenses) has no picker entry to
+    // follow, so it is offered when the picked tests cover its sections.
     const selected = new Set(enabledTests().map(tst => tst.key));
-    const available = EXAMS.filter(e => !e.sections.length || selected.has(e.key));
+    const testKeys = new Set(TESTS.map(tst => tst.key));
+    const activeSecs = new Set(enabledSections());
+    const available = EXAMS.filter(e => !e.sections.length
+      || (testKeys.has(e.key) ? selected.has(e.key)
+        : e.sections.every(sec => activeSecs.has(sec))));
     const hidden = EXAMS.length - available.length;
     view.innerHTML = `
       <div class="examsetup">
