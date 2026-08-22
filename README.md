@@ -13,7 +13,10 @@ readiness projection (`js/readiness.js`), persistence (`js/storage.js`), the
 service worker (`sw.js`), the structural stylesheet (`css/engine.css`), and
 the shared test suites (`tests/`). The files in `MANIFEST` are copied
 verbatim into every app repo by the sync workflow, which opens a PR per app
-so each app's own CI gates the update.
+so each app's own CI gates the update. The manifest also syncs itself and an
+`engine-guard` workflow, so a pull request in an app repo that edits a synced
+file fails CI with a pointer back here (the sync PRs, on the `engine-sync`
+branch, are exempt).
 
 ## What an app owns
 

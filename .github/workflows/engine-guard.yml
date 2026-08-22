@@ -1,0 +1,45 @@
+# Fails a pull request that edits engine-owned files. Everything listed in
+# MANIFEST is synced verbatim from ullbergm/trainer-engine, so a change made
+# in an app repo is overwritten by the next sync PR; it belongs in the engine
+# repo, where its CI and the sync PRs run it against every app. The sync PRs
+# themselves arrive on the engine-sync branch and are exempt.
+# Synced from the trainer-engine repo; do not edit in an app repo.
+name: engine-guard
+
+on:
+  pull_request:
+
+jobs:
+  guard:
+    # The engine repo owns these files; the guard only patrols the app repos.
+    if: github.repository != 'ullbergm/trainer-engine' && github.head_ref != 'engine-sync'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check for edits to engine-synced files
+        run: |
+          base="${{ github.event.pull_request.base.sha }}"
+          head="${{ github.event.pull_request.head.sha }}"
+          changed=$(git diff --name-only "$base...$head")
+          # Read the list from the base commit, so a PR cannot lift the guard
+          # by editing MANIFEST in the same change. (First sync ever: the base
+          # has no MANIFEST yet, fall back to the incoming copy.)
+          manifest=$(git show "$base:MANIFEST" 2>/dev/null || cat MANIFEST)
+          synced=$(grep -v '^#' <<<"$manifest" | sed '/^$/d')
+          bad=$(comm -12 <(sort -u <<<"$changed") <(sort -u <<<"$synced"))
+          if [ -n "$bad" ]; then
+            {
+              echo "### Engine-synced files changed"
+              echo
+              echo "These files are synced from ullbergm/trainer-engine and will be"
+              echo "overwritten by the next sync PR. Change them there instead:"
+              echo
+              sed 's/^/- `/; s/$/`/' <<<"$bad"
+              echo
+              echo "See CONTRIBUTING.md, \"Engine files and app files\"."
+            } | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          echo "No engine-synced files touched."

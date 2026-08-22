@@ -4,9 +4,10 @@
 # can lag safely and a breaking engine change surfaces in the PR, not on the
 # live site.
 #
-# Needs a classic PAT with `repo` scope saved as the SYNC_TOKEN secret, so the
-# pushed branches trigger the app repos' workflows (the default GITHUB_TOKEN
-# cannot reach other repos).
+# Needs a classic PAT with `repo` and `workflow` scope saved as the
+# SYNC_TOKEN secret: `repo` so the pushed branches trigger the app repos'
+# workflows (the default GITHUB_TOKEN cannot reach other repos), `workflow`
+# because the manifest includes .github/workflows/engine-guard.yml.
 name: sync-apps
 
 on:

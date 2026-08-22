@@ -1,7 +1,11 @@
-# Files synced verbatim into every app repo. One path per line, same path on
-# both sides. The sync workflow copies exactly this list; a file an app must
-# own (index.html, css/app.css, data/*, tests/test.html, tests/app-suite.js,
-# eslint.config.mjs, package.json) is never listed here.
+# Engine-owned files, synced verbatim from ullbergm/trainer-engine into every
+# app repo — one path per line, same path on both sides. In an app repo these
+# files must not be edited (the engine-guard workflow fails a PR that tries);
+# change them in the engine repo, whose sync workflow copies exactly this
+# list. A file an app owns (index.html, css/app.css, data/*, tests/test.html,
+# tests/app-suite.js, eslint.config.mjs, package.json) is never listed here.
+MANIFEST
+.github/workflows/engine-guard.yml
 js/app.js
 js/fsrs.js
 js/readiness.js
