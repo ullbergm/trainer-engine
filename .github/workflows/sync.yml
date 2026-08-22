@@ -112,6 +112,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Open sync PR
+        id: pr
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
           token: ${{ secrets.SYNC_TOKEN }}
@@ -123,3 +124,16 @@ jobs:
           commit-message: ${{ steps.notes.outputs.commitmsg }}
           title: 'Sync trainer-engine'
           body: ${{ steps.notes.outputs.body }}
+
+      # The sync PR merges on its own once the app's required checks pass; a
+      # failing check leaves it open for a human. Requires the app repos'
+      # allow-auto-merge setting, and merge is the only method the app
+      # rulesets allow.
+      - name: Enable auto-merge
+        if: steps.pr.outputs.pull-request-number
+        env:
+          GH_TOKEN: ${{ secrets.SYNC_TOKEN }}
+        run: >-
+          gh pr merge --merge --auto
+          "${{ steps.pr.outputs.pull-request-number }}"
+          --repo "ullbergm/${{ matrix.repo }}"
