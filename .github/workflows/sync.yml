@@ -117,6 +117,9 @@ jobs:
           token: ${{ secrets.SYNC_TOKEN }}
           path: app
           branch: engine-sync
+          # Create the commits through the GitHub API so GitHub signs them;
+          # the app repos' protect-main ruleset requires verified signatures.
+          sign-commits: true
           commit-message: ${{ steps.notes.outputs.commitmsg }}
           title: 'Sync trainer-engine'
           body: ${{ steps.notes.outputs.body }}
