@@ -6,6 +6,14 @@
 # can lag safely and a breaking engine change surfaces in the PR, not on the
 # live site.
 #
+# The sync commit's body lists the engine's feat and fix subjects since the
+# previous release, rescoped as (engine). release-please in each app reads
+# body lines that look like conventional commits as extra changelog entries,
+# so the engine changes appear in the app's next release notes instead of a
+# bare "sync trainer-engine" line. If an app skips a release and the open
+# sync PR is refreshed by a newer one, the commit lists only the newest
+# release's delta; the engine's own CHANGELOG.md has the full history.
+#
 # Needs a classic PAT with `repo` and `workflow` scope saved as the
 # SYNC_TOKEN secret: `repo` so the pushed branches trigger the app repos'
 # workflows (the default GITHUB_TOKEN cannot reach other repos), `workflow`
@@ -42,6 +50,9 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           path: engine
+          # The full history, so the sync message can list the changes since
+          # the previous release tag.
+          fetch-depth: 0
 
       - name: Checkout ${{ matrix.repo }}
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -59,17 +70,53 @@ jobs:
             cp "$f" "../app/$f"
           done
 
+      - name: Compose the sync message
+        id: notes
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          cd engine
+          ref="${VERSION:-$GITHUB_SHA}"
+          prev=$(git describe --tags --abbrev=0 "$ref^" 2>/dev/null || true)
+          changes=""
+          if [ -n "$prev" ]; then
+            # Only feat and fix become changelog lines; an original scope is
+            # replaced by (engine) so the app changelog says where the change
+            # came from, and a breaking-change marker survives.
+            changes=$(git log --no-merges --format=%s "$prev..$ref" \
+              | grep -E '^(feat|fix)(\([^)]*\))?!?:' \
+              | sed -E 's/^(feat|fix)(\([^)]*\))?(!?):/\1(engine)\3:/') || true
+          fi
+          {
+            echo "commitmsg<<SYNC_EOF"
+            echo "fix: sync trainer-engine $ref"
+            if [ -n "$changes" ]; then
+              echo
+              echo "$changes"
+            fi
+            echo "SYNC_EOF"
+            echo "body<<SYNC_EOF"
+            echo "Automated sync of the shared engine files from"
+            echo "ullbergm/trainer-engine $ref."
+            if [ -n "$changes" ]; then
+              echo
+              echo "Engine changes carried by this sync, which release-please"
+              echo "lists in this app's next release notes:"
+              echo
+              echo "$changes" | sed 's/^/- /'
+            fi
+            echo
+            echo "Merge once this repo's CI is green. See the engine repo's"
+            echo "MANIFEST for what is synced."
+            echo "SYNC_EOF"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Open sync PR
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
           token: ${{ secrets.SYNC_TOKEN }}
           path: app
           branch: engine-sync
-          commit-message: 'fix: sync trainer-engine ${{ inputs.version || github.sha }}'
+          commit-message: ${{ steps.notes.outputs.commitmsg }}
           title: 'Sync trainer-engine'
-          body: |
-            Automated sync of the shared engine files from
-            ullbergm/trainer-engine ${{ inputs.version || github.sha }}.
-
-            Merge once this repo's CI is green. See the engine repo's
-            MANIFEST for what is synced.
+          body: ${{ steps.notes.outputs.body }}
