@@ -1,4 +1,6 @@
-# Opens a sync PR in every app repo whenever an engine file changes on main.
+# Opens a sync PR in every app repo when an engine release is cut. The
+# Release workflow calls this with the tag once the release-please PR is
+# merged, so the apps track released engine versions, not every push to main.
 # Each PR carries the exact files in MANIFEST and runs the app's own CI
 # (bank validation, unit tests, browser suite) before it can merge, so an app
 # can lag safely and a breaking engine change surfaces in the PR, not on the
@@ -11,9 +13,18 @@
 name: sync-apps
 
 on:
-  push:
-    branches: [main]
+  workflow_call:
+    inputs:
+      version:
+        description: Release tag being synced, used to label the sync PRs
+        required: false
+        type: string
   workflow_dispatch:
+    inputs:
+      version:
+        description: Label for the sync PRs (defaults to the commit sha)
+        required: false
+        type: string
 
 jobs:
   sync:
@@ -28,12 +39,12 @@ jobs:
           - nc-pesticide-test-training
     steps:
       - name: Checkout engine
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           path: engine
 
       - name: Checkout ${{ matrix.repo }}
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: ullbergm/${{ matrix.repo }}
           token: ${{ secrets.SYNC_TOKEN }}
@@ -49,16 +60,16 @@ jobs:
           done
 
       - name: Open sync PR
-        uses: peter-evans/create-pull-request@v8
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
           token: ${{ secrets.SYNC_TOKEN }}
           path: app
           branch: engine-sync
-          commit-message: 'fix: sync trainer-engine ${{ github.sha }}'
+          commit-message: 'fix: sync trainer-engine ${{ inputs.version || github.sha }}'
           title: 'Sync trainer-engine'
           body: |
             Automated sync of the shared engine files from
-            ullbergm/trainer-engine@${{ github.sha }}.
+            ullbergm/trainer-engine ${{ inputs.version || github.sha }}.
 
             Merge once this repo's CI is green. See the engine repo's
             MANIFEST for what is synced.
