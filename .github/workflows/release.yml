@@ -24,6 +24,13 @@ jobs:
       - id: release
         uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         with:
+          # A pull request created with the default GITHUB_TOKEN cannot fire
+          # other workflows, so the release PR's required checks never run and
+          # auto-merge sits blocked. The SYNC_TOKEN PAT opens the PR as its
+          # owner, which triggers CI like any human-opened PR. A fork without
+          # the secret falls back to the default token and has to re-trigger
+          # the checks by hand (close and reopen the release PR).
+          token: ${{ secrets.SYNC_TOKEN || github.token }}
           release-type: simple
 
   # The apps only get a sync PR when a release is cut (the release-please PR
