@@ -162,22 +162,46 @@ button.danger { border-color: var(--bad); color: var(--bad); background: transpa
 .badge.review { background: var(--ok-bg); color: var(--ok); }
 .badge.relearn { background: var(--bad-bg); color: var(--bad); }
 
-/* progress: the app's optional --track-texture over the dark track */
+/* progress: the app's optional --track-texture over the dark track, plus an
+   optional --track-marker (an emoji string or a url() image) that rides the
+   leading edge of the fill. Both fall back to a plain bar when unset. The
+   marker overhangs the 10px track on purpose, so the track cannot clip
+   (no overflow: hidden); the fill carries its own radius instead. */
 .progress {
   height: 10px;
   border-radius: 6px;
-  margin: 12px 0 6px;
+  /* Apps that set a --track-marker also reserve its footprint (marker width
+     plus the 3px gap) as --track-marker-clearance, so the marker still fits
+     inside the layout when the bar reaches 100%. */
+  margin: 12px var(--track-marker-clearance, 0) 6px 0;
   background:
-    var(--track-texture)
+    var(--track-texture, none)
     center / 100% 2px no-repeat,
     var(--surface-dark);
-  overflow: hidden;
 }
 .progress div {
+  position: relative;
   height: 100%;
   background: var(--accent);
   border-radius: 6px 3px 3px 6px;
   transition: width 0.2s;
+}
+/* Descendants of role="progressbar" are presentational, so the marker is
+   invisible to assistive tech regardless of its content. */
+.progress div::after {
+  content: var(--track-marker, none);
+  position: absolute;
+  right: 0;
+  top: 50%;
+  /* The marker travels just ahead of the fill: shifted its full width past
+     the leading edge, plus a 3px gap of bare track so it never overlaps
+     the fill. */
+  /* Extra transform for quirks in the marker artwork: mirror left-facing
+     vehicle emoji with scaleX(-1) so they travel toward the finish, lift
+     glyphs that hang below their box's center with translateY(...). */
+  transform: translate(calc(100% + 3px), -50%) var(--track-marker-adjust, scale(1));
+  font-size: 15px;
+  line-height: 1;
 }
 
 .qtext { font-size: 1.2rem; line-height: 1.4; }
