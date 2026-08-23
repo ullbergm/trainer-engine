@@ -202,6 +202,11 @@ button.danger { border-color: var(--bad); color: var(--bad); background: transpa
   transform: translate(calc(100% + 3px), -50%) var(--track-marker-adjust, scale(1));
   font-size: 15px;
   line-height: 1;
+  /* Emoji markers only (url() images ignore fonts): name the platform emoji
+     fonts explicitly, since the page's font stack doesn't, and Linux font
+     fallback otherwise picks whatever obscure font has the glyph — tiny,
+     monochrome, or missing. */
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
 }
 
 .qtext { font-size: 1.2rem; line-height: 1.4; }
