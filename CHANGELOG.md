@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.1](https://github.com/ullbergm/trainer-engine/compare/v2.1.0...v2.1.1) (2026-08-23)
+
+
+### Bug Fixes
+
+* name the platform emoji fonts for emoji track markers ([75e374b](https://github.com/ullbergm/trainer-engine/commit/75e374b2b78483803f46c10c5a18daeb006cfc17))
+
 ## [2.1.0](https://github.com/ullbergm/trainer-engine/compare/v2.0.1...v2.1.0) (2026-08-23)
 
 
