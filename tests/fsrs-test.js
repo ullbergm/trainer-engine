@@ -5,8 +5,12 @@
  * mis-scheduling reviews. */
 const fs = require('fs');
 const path = require('path');
-eval(fs.readFileSync(path.join(__dirname, '..', 'js', 'fsrs.js'), 'utf8')
-  .replace('const FSRS', 'globalThis.FSRS'));
+const vm = require('vm');
+// vm.runInThisContext instead of eval so V8 attributes the executed lines
+// to js/fsrs.js and `npm run test:coverage` can report on the engine code.
+const fsrsPath = path.join(__dirname, '..', 'js', 'fsrs.js');
+vm.runInThisContext(fs.readFileSync(fsrsPath, 'utf8')
+  .replace('const FSRS', 'globalThis.FSRS'), { filename: fsrsPath });
 
 const DAY = 24 * 60 * 60 * 1000;
 const T0 = 1700000000000; // fixed epoch so runs are reproducible

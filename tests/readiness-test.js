@@ -5,9 +5,16 @@
  * the last of those against a Monte Carlo simulation of the real draw. */
 const fs = require('fs');
 const path = require('path');
-const read = f => fs.readFileSync(path.join(__dirname, '..', 'js', f), 'utf8');
-eval(read('fsrs.js').replace('const FSRS', 'globalThis.FSRS'));
-eval(read('readiness.js').replace('const Readiness', 'globalThis.Readiness'));
+const vm = require('vm');
+// vm.runInThisContext instead of eval so V8 attributes the executed lines
+// to the js/ files and `npm run test:coverage` can report on the engine code.
+const load = (f, g) => {
+  const p = path.join(__dirname, '..', 'js', f);
+  vm.runInThisContext(fs.readFileSync(p, 'utf8')
+    .replace('const ' + g, 'globalThis.' + g), { filename: p });
+};
+load('fsrs.js', 'FSRS');
+load('readiness.js', 'Readiness');
 
 const DAY = 24 * 60 * 60 * 1000;
 const T0 = 1700000000000; // fixed epoch so runs are reproducible

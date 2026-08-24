@@ -5,10 +5,13 @@
   "license": "MIT",
   "scripts": {
     "lint": "eslint",
-    "test": "node tests/fsrs-test.js && node tests/readiness-test.js"
+    "prepare": "git config core.hooksPath .githooks",
+    "test": "node tests/fsrs-test.js && node tests/readiness-test.js",
+    "test:coverage": "c8 --exclude tests --exclude tools --exclude dist --reporter=text --reporter=text-summary npm test"
   },
   "devDependencies": {
     "@eslint/js": "^10",
+    "c8": "^12",
     "eslint": "^10",
     "globals": "^17"
   }
