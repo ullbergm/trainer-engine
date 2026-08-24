@@ -1505,11 +1505,19 @@
         <h3>Changelog${appVersion ? ` <small>current: v${appVersion}</small>` : ''}</h3>
         <div id="changelog" class="changelog"><p class="hint">Loading changelog...</p></div>
       </div>`;
+    // The reader may have left About before the fetch settles, taking
+    // #changelog with it; a settled fetch with nowhere to render is not an
+    // error, so both handlers tolerate the missing element.
     fetch('CHANGELOG.md')
       .then(r => (r.ok ? r.text() : Promise.reject(new Error(r.status))))
-      .then(md => { $('#changelog').innerHTML = changelogHTML(md); })
+      .then(md => {
+        const el = $('#changelog');
+        if (el) el.innerHTML = changelogHTML(md);
+      })
       .catch(() => {
-        $('#changelog').innerHTML = `<p class="hint">The changelog could not be loaded.
+        const el = $('#changelog');
+        if (!el) return;
+        el.innerHTML = `<p class="hint">The changelog could not be loaded.
           See the <a href="${CFG.repo}/releases" target="_blank" rel="noopener">releases
           page on GitHub</a>.</p>`;
       });
