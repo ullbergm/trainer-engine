@@ -165,10 +165,10 @@ button.danger { border-color: var(--bad); color: var(--bad); background: transpa
 /* progress: the app's optional --track-texture over the dark track, plus an
    optional --track-marker (an emoji string or a url() image) that rides the
    leading edge of the fill. Both fall back to a plain bar when unset. The
-   marker overhangs the 10px track on purpose, so the track cannot clip
+   marker may overhang the track on purpose, so the track cannot clip
    (no overflow: hidden); the fill carries its own radius instead. */
 .progress {
-  height: 10px;
+  height: 20px;
   border-radius: 6px;
   /* Apps that set a --track-marker also reserve its footprint (marker width
      plus the 3px gap) as --track-marker-clearance, so the marker still fits
