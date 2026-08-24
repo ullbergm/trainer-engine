@@ -1,5 +1,20 @@
 # Changelog
 
+## [2.2.0](https://github.com/ullbergm/trainer-engine/compare/v2.1.1...v2.2.0) (2026-08-24)
+
+
+### Features
+
+* catch near-duplicate question stems in bank validation ([bb291f5](https://github.com/ullbergm/trainer-engine/commit/bb291f5db0e23ecc348c17766bccc23866fd1f96))
+* double the progress track height to 20px ([da4ba02](https://github.com/ullbergm/trainer-engine/commit/da4ba02b861bfcd4bd257bb943ad6585c75d51ed))
+* show an optional illustration with a question ([c27cd15](https://github.com/ullbergm/trainer-engine/commit/c27cd15ceb47f43df216994ff6f03f750de93242))
+* support true/false questions ([14e9bc5](https://github.com/ullbergm/trainer-engine/commit/14e9bc5b66f4b1b1336f08f1d4a4c664dc92ccc1))
+
+
+### Bug Fixes
+
+* tolerate leaving About before the changelog fetch settles ([06458d1](https://github.com/ullbergm/trainer-engine/commit/06458d1a49627bbbd300113ddf1f6f18f025b06b))
+
 ## [2.1.1](https://github.com/ullbergm/trainer-engine/compare/v2.1.0...v2.1.1) (2026-08-23)
 
 
