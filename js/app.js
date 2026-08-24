@@ -158,10 +158,15 @@
   };
 
   // Choices like "All of the above" refer to the other choices by position,
-  // so they must stay below them no matter how the rest are shuffled.
+  // so they must stay below them no matter how the rest are shuffled. A
+  // two-choice question (true/false, yes/no) reads in its written order:
+  // shuffling "False" above "True" helps nobody, and with the whole bank
+  // shuffle-free there is no position pattern to exploit.
   const POSITIONAL = /^(all|none|any|both) of (the above|these)/i;
   const choiceOrder = q => {
-    const order = shuffle([0, 1, 2, 3]);
+    const indices = q.choices.map((_, i) => i);
+    if (indices.length <= 2) return indices;
+    const order = shuffle(indices);
     return order.filter(i => !POSITIONAL.test(q.choices[i]))
       .concat(order.filter(i => POSITIONAL.test(q.choices[i])));
   };

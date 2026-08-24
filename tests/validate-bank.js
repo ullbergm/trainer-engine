@@ -57,6 +57,12 @@ const norm = s => String(s).toLowerCase().replace(/\s+/g, ' ').trim();
 const requiredFields = ['id', 'section', 'sectionName', 'question', 'choices', 'answer'];
 if (EXAM_CONFIG.requireExplanations !== false) requiredFields.push('explanation');
 const dupExceptions = new Set(EXAM_CONFIG.allowDuplicateChoices || []);
+// Four choices is the default contract, and a question that lost one is a
+// real authoring error, so anything else is opt-in: a bank with true/false
+// questions sets EXAM_CONFIG.allowedChoiceCounts (e.g. [2, 4]). Two-choice
+// questions render in written order — the app never shuffles them.
+const allowedCounts = new Set(EXAM_CONFIG.allowedChoiceCounts || [4]);
+const countsLabel = [...allowedCounts].sort().join(' or ');
 
 for (const q of QUESTION_BANK) {
   const label = q.id || '(missing id)';
@@ -70,10 +76,14 @@ for (const q of QUESTION_BANK) {
     : norm(q.question);
   if (questionTexts.has(qn)) errors.push(`${label}: duplicate question (also ${questionTexts.get(qn)})`);
   questionTexts.set(qn, q.id);
-  if (!Array.isArray(q.choices) || q.choices.length !== 4) errors.push(`${label}: needs exactly 4 choices`);
-  else if (new Set(q.choices.map(norm)).size !== 4
+  if (!Array.isArray(q.choices) || !allowedCounts.has(q.choices.length)) {
+    errors.push(`${label}: needs ${countsLabel} choices`);
+  } else if (new Set(q.choices.map(norm)).size !== q.choices.length
       && !dupExceptions.has(q.id)) errors.push(`${label}: duplicate choices`);
-  if (!Number.isInteger(q.answer) || q.answer < 0 || q.answer > 3) errors.push(`${label}: answer out of range`);
+  const nChoices = Array.isArray(q.choices) && q.choices.length ? q.choices.length : 4;
+  if (!Number.isInteger(q.answer) || q.answer < 0 || q.answer >= nChoices) {
+    errors.push(`${label}: answer out of range`);
+  }
   // Optional: the mistake behind each wrong choice, parallel to `choices` and
   // null at the correct one, which the feedback screen shows for the choice
   // actually picked. Each entry completes the sentence "You ...", so it is a
@@ -261,15 +271,18 @@ readmeCounts.filter(n => n !== QUESTION_BANK.length).forEach(n =>
 // Answer-length tell: if the correct choice is disproportionately often the
 // longest (or shortest) option, test-savvy users can score without knowing the
 // material. Chance for either is ~25%; warn well before it becomes a pattern.
-let longestCorrect = 0, shortestCorrect = 0;
+// Two-choice questions sit out: they render unshuffled, so there is no
+// length pattern to hide, and true/false have no lengths to balance.
+let longestCorrect = 0, shortestCorrect = 0, shuffled = 0;
 for (const q of QUESTION_BANK) {
-  if (!Array.isArray(q.choices) || q.choices.length !== 4) continue;
+  if (!Array.isArray(q.choices) || q.choices.length < 3) continue;
+  shuffled++;
   const lens = q.choices.map(c => String(c).length);
   const others = lens.filter((_, i) => i !== q.answer);
   if (lens[q.answer] > Math.max(...others)) longestCorrect++;
   if (lens[q.answer] < Math.min(...others)) shortestCorrect++;
 }
-const pct = n => Math.round((n / QUESTION_BANK.length) * 100);
+const pct = n => (shuffled ? Math.round((n / shuffled) * 100) : 0);
 console.log(`${QUESTION_BANK.length} questions, answer positions ${positions.join('/')}`);
 console.log(`answer-length: correct is uniquely longest in ${pct(longestCorrect)}%, uniquely shortest in ${pct(shortestCorrect)}% (chance ~25%)`);
 if (pct(longestCorrect) > 35) {
