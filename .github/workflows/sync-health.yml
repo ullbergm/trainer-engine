@@ -30,7 +30,7 @@ jobs:
         run: |
           set -euo pipefail
           owner="${GITHUB_REPOSITORY%%/*}"
-          apps="epa-trainer faa-drone-trainer fcc-commercial-trainer nc-cdl-trainer nc-pesticide-trainer"
+          apps="epa-trainer faa-drone-trainer fcc-commercial-trainer nc-cdl-trainer nc-locksmith-trainer nc-pesticide-trainer"
           latest=$(gh api "repos/$owner/trainer-engine/releases/latest" --jq .tag_name)
           latest="${latest#v}"
           now=$(date +%s)
