@@ -18,7 +18,7 @@ the diagonal; they come from each repo's `docs/screenshots/`):
 
 | [fcc-commercial-trainer](https://github.com/ullbergm/fcc-commercial-trainer) | [nc-cdl-trainer](https://github.com/ullbergm/nc-cdl-trainer) |
 | --- | --- |
-| <img src="https://raw.githubusercontent.com/ullbergm/fcc-commercial-trainer/main/docs/screenshots/home.png" width="400" alt="FCC Commercial Trainer home screen in its signal-violet theme, split diagonally between light and dark mode"> | <img src="https://raw.githubusercontent.com/ullbergm/nc-cdl-trainer/main/docs/screenshots/home.png" width="400" alt="NC CDL Trainer home screen in its highway guide-sign-green theme, split diagonally between light and dark mode"> |
+| <img src="https://raw.githubusercontent.com/ullbergm/fcc-commercial-trainer/main/docs/screenshots/home.png" width="400" alt="FCC Commercial Trainer home screen in its electric-orchid theme, split diagonally between light and dark mode"> | <img src="https://raw.githubusercontent.com/ullbergm/nc-cdl-trainer/main/docs/screenshots/home.png" width="400" alt="NC CDL Trainer home screen in its highway guide-sign-green theme, split diagonally between light and dark mode"> |
 
 | [nc-pesticide-trainer](https://github.com/ullbergm/nc-pesticide-trainer) | |
 | --- | --- |
