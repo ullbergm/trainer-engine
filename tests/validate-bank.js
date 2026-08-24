@@ -227,11 +227,16 @@ if (core.length < 5) errors.push('sw.js: could not parse the CORE precache list'
 // all-or-nothing way, so they are held to the same must-exist rule.
 if (Array.isArray(globalThis.APP_ASSETS)) core.push(...globalThis.APP_ASSETS);
 else errors.push('data/app-assets.js must define the APP_ASSETS array sw.js precaches');
-const release = fs.readFileSync(path.join(root, '.github', 'workflows', 'release.yml'), 'utf8');
-const staged = ((release.match(/cp -r (.+) dist\//) || ['', ''])[1]).split(/\s+/);
+// The staging recipe lives in tools/stage-site.sh (synced with the engine)
+// where release.yml delegates to it; an app that still stages inline keeps
+// the recipe in release.yml. Read both, so either satisfies the checks.
+let staging = fs.readFileSync(path.join(root, '.github', 'workflows', 'release.yml'), 'utf8');
+const stageScript = path.join(root, 'tools', 'stage-site.sh');
+if (fs.existsSync(stageScript)) staging += fs.readFileSync(stageScript, 'utf8');
+const staged = ((staging.match(/cp -r (.+) dist\//) || ['', ''])[1]).split(/\s+/);
 for (const entry of core) {
   const p = entry === './' ? 'index.html' : entry;
-  const generatedAtDeploy = release.includes(`dist/${p}`);
+  const generatedAtDeploy = staging.includes(`dist/${p}`);
   if (!fs.existsSync(path.join(root, p)) && !generatedAtDeploy) {
     errors.push(`sw.js CORE entry "${entry}" does not exist and is not generated at deploy`);
   }
@@ -269,6 +274,43 @@ console.log(`${QUESTION_BANK.length} questions, answer positions ${positions.joi
 console.log(`answer-length: correct is uniquely longest in ${pct(longestCorrect)}%, uniquely shortest in ${pct(shortestCorrect)}% (chance ~25%)`);
 if (pct(longestCorrect) > 35) {
   console.warn('WARN correct answers skew long; "pick the longest" beats chance. Rebalance before it grows.');
+}
+
+// Near-duplicate stems: two authored questions that ask the same thing in
+// slightly different words are almost always an authoring accident (a
+// reworded question added without deleting the original). They split the
+// FSRS scheduling of one fact across two cards and can put the "same"
+// question twice in one mock exam. Token-set Jaccard catches rewording that
+// the exact-duplicate check above cannot. A verbatim pool repeats stems by
+// design, so the check applies only to authored banks; a deliberate pair
+// (e.g. contrasting min/max questions) is excepted by listing its two ids in
+// EXAM_CONFIG.allowSimilarQuestions as ["id-a", "id-b"].
+if (!EXAM_CONFIG.verbatimPool) {
+  const stop = new Set(['the', 'a', 'an', 'of', 'to', 'in', 'is', 'are', 'for',
+    'on', 'and', 'or', 'what', 'which', 'when', 'that', 'with', 'you', 'your']);
+  // Short tokens stay: "class c" vs "class d" and "1x" vs "2x" are exactly
+  // how deliberate contrast pairs differ, and dropping them would merge the
+  // pair into a false duplicate.
+  const tokens = QUESTION_BANK.map(q => new Set(norm(q.question || '')
+    .split(/[^a-z0-9]+/).filter(w => w && !stop.has(w))));
+  const allowed = new Set((EXAM_CONFIG.allowSimilarQuestions || [])
+    .map(pair => [...pair].sort().join('|')));
+  for (let i = 0; i < QUESTION_BANK.length; i++) {
+    for (let j = i + 1; j < QUESTION_BANK.length; j++) {
+      const a = tokens[i], b = tokens[j];
+      if (a.size < 3 || b.size < 3) continue;
+      // A pair can only clear the Jaccard bar if the sets are near-equal in
+      // size; skip the intersection work when they cannot.
+      if (Math.min(a.size, b.size) / Math.max(a.size, b.size) < 0.85) continue;
+      let shared = 0;
+      for (const t of a) if (b.has(t)) shared++;
+      if (shared / (a.size + b.size - shared) < 0.85) continue;
+      const idA = QUESTION_BANK[i].id, idB = QUESTION_BANK[j].id;
+      if (allowed.has([idA, idB].sort().join('|'))) continue;
+      errors.push(`${idA} and ${idB} look like the same question reworded; `
+        + 'delete one, or list the pair in EXAM_CONFIG.allowSimilarQuestions if both belong');
+    }
+  }
 }
 if (errors.length) {
   errors.forEach(e => console.error('ERROR ' + e));
