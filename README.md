@@ -12,17 +12,13 @@ One engine, five faces — each app restyles the same UI through its own color
 tokens and progress-bar theme (every image splits light theme over dark across
 the diagonal; they come from each repo's `docs/screenshots/`):
 
-| [epa-trainer](https://github.com/ullbergm/epa-trainer) | [faa-drone-trainer](https://github.com/ullbergm/faa-drone-trainer) |
+| [nc-pesticide-trainer](https://github.com/ullbergm/nc-pesticide-trainer) | [faa-drone-trainer](https://github.com/ullbergm/faa-drone-trainer) |
 | --- | --- |
-| <img src="https://raw.githubusercontent.com/ullbergm/epa-trainer/main/docs/screenshots/home.png" width="400" alt="EPA Trainer home screen in its cylinder-rose theme, split diagonally between light and dark mode"> | <img src="https://raw.githubusercontent.com/ullbergm/faa-drone-trainer/main/docs/screenshots/home.png" width="400" alt="FAA Drone Trainer home screen in its airfield clear-sky-blue theme, split diagonally between light and dark mode"> |
-
+| <img src="https://raw.githubusercontent.com/ullbergm/nc-pesticide-trainer/main/docs/screenshots/home.png" width="400" alt="NC Pesticide Trainer home screen in its earth-tone theme, split diagonally between light and dark mode"> | <img src="https://raw.githubusercontent.com/ullbergm/faa-drone-trainer/main/docs/screenshots/home.png" width="400" alt="FAA Drone Trainer home screen in its airfield clear-sky-blue theme, split diagonally between light and dark mode"> |
 | [fcc-commercial-trainer](https://github.com/ullbergm/fcc-commercial-trainer) | [nc-cdl-trainer](https://github.com/ullbergm/nc-cdl-trainer) |
-| --- | --- |
 | <img src="https://raw.githubusercontent.com/ullbergm/fcc-commercial-trainer/main/docs/screenshots/home.png" width="400" alt="FCC Commercial Trainer home screen in its electric-orchid theme, split diagonally between light and dark mode"> | <img src="https://raw.githubusercontent.com/ullbergm/nc-cdl-trainer/main/docs/screenshots/home.png" width="400" alt="NC CDL Trainer home screen in its highway guide-sign-green theme, split diagonally between light and dark mode"> |
-
-| [nc-pesticide-trainer](https://github.com/ullbergm/nc-pesticide-trainer) | |
-| --- | --- |
-| <img src="https://raw.githubusercontent.com/ullbergm/nc-pesticide-trainer/main/docs/screenshots/home.png" width="400" alt="NC Pesticide Trainer home screen in its earth-tone theme, split diagonally between light and dark mode"> | |
+| [epa-trainer](https://github.com/ullbergm/epa-trainer) | |
+| <img src="https://raw.githubusercontent.com/ullbergm/epa-trainer/main/docs/screenshots/home.png" width="400" alt="EPA Trainer home screen in its cylinder-rose theme, split diagonally between light and dark mode"> | |
 
 Each app is a no-build static PWA. The engine is everything exam-agnostic:
 the study/exam/stats UI (`js/app.js`), the FSRS scheduler (`js/fsrs.js`),
