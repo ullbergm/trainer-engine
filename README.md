@@ -14,7 +14,7 @@ the diagonal; they come from each repo's `docs/screenshots/`):
 
 | [epa-trainer](https://github.com/ullbergm/epa-trainer) | [faa-drone-trainer](https://github.com/ullbergm/faa-drone-trainer) |
 | --- | --- |
-| <img src="https://raw.githubusercontent.com/ullbergm/epa-trainer/main/docs/screenshots/home.png" width="400" alt="EPA Trainer home screen in its glacier-teal theme, split diagonally between light and dark mode"> | <img src="https://raw.githubusercontent.com/ullbergm/faa-drone-trainer/main/docs/screenshots/home.png" width="400" alt="FAA Drone Trainer home screen in its airfield clear-sky-blue theme, split diagonally between light and dark mode"> |
+| <img src="https://raw.githubusercontent.com/ullbergm/epa-trainer/main/docs/screenshots/home.png" width="400" alt="EPA Trainer home screen in its cylinder-rose theme, split diagonally between light and dark mode"> | <img src="https://raw.githubusercontent.com/ullbergm/faa-drone-trainer/main/docs/screenshots/home.png" width="400" alt="FAA Drone Trainer home screen in its airfield clear-sky-blue theme, split diagonally between light and dark mode"> |
 
 | [fcc-commercial-trainer](https://github.com/ullbergm/fcc-commercial-trainer) | [nc-cdl-trainer](https://github.com/ullbergm/nc-cdl-trainer) |
 | --- | --- |
