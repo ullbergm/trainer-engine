@@ -210,6 +210,18 @@ button.danger { border-color: var(--bad); color: var(--bad); background: transpa
 }
 
 .qtext { font-size: 1.2rem; line-height: 1.4; }
+/* Optional illustration a question carries (q.image). Boxed on white even in
+   dark mode: the artwork comes from manuals that assume a white page, so
+   letting it sit on the dark card would make its black lines vanish. */
+.qimage {
+  display: block;
+  max-width: 100%;
+  margin: 4px 0 10px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+}
 .choices { display: grid; gap: 8px; }
 .choice {
   font: inherit;

@@ -94,6 +94,27 @@ for (const q of QUESTION_BANK) {
       });
     }
   }
+  // Optional illustration ({src, alt}) rendered with the question. The file
+  // must exist and ride the service worker precache via data/app-assets.js —
+  // offline study would silently lose it otherwise — and must carry alt text,
+  // since a sighted reader gets whatever the picture says.
+  if (q.image !== undefined) {
+    if (typeof q.image !== 'object' || q.image === null
+        || typeof q.image.src !== 'string' || !q.image.src.trim()) {
+      errors.push(`${label}: image needs a src`);
+    } else {
+      if (!fs.existsSync(path.join(__dirname, '..', q.image.src))) {
+        errors.push(`${label}: image "${q.image.src}" does not exist`);
+      }
+      if (!Array.isArray(globalThis.APP_ASSETS) || !globalThis.APP_ASSETS.includes(q.image.src)) {
+        errors.push(`${label}: image "${q.image.src}" is not precached in data/app-assets.js`);
+      }
+    }
+    if (typeof q.image !== 'object' || q.image === null
+        || typeof q.image.alt !== 'string' || !q.image.alt.trim()) {
+      errors.push(`${label}: image needs alt text`);
+    }
+  }
   if (!Number.isInteger(q.section) || q.section < 1) errors.push(`${label}: bad section`);
   // Citations are optional (an exam may have nothing citable) unless the
   // config demands them, but a question that carries one must resolve
