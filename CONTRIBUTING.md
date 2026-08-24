@@ -1,8 +1,8 @@
 # Contributing
 
 Thanks for taking the time. This repository is the shared engine behind the
-five ullbergm exam trainers (epa, faa-drone, fcc-commercial, nc-cdl,
-nc-pesticide): the spaced-repetition study UI, the FSRS scheduler, the
+six ullbergm exam trainers (epa, faa-drone, fcc-commercial, nc-cdl,
+nc-locksmith, nc-pesticide): the spaced-repetition study UI, the FSRS scheduler, the
 readiness projection, storage, the service worker, the structural CSS, and
 the shared test suites.
 
@@ -13,14 +13,14 @@ By participating you agree to the [Code of Conduct](CODE_OF_CONDUCT.md).
 - **Report a bug.** Use the
   [bug report template](https://github.com/ullbergm/trainer-engine/issues/new?template=bug-report.yml).
   If you saw it in one of the trainer apps, say which one; the engine code is
-  identical across all five, so it almost certainly reproduces everywhere.
+  identical across all six, so it almost certainly reproduces everywhere.
 - **Fix a question.** The question banks are not here. Open the correction in
   the app repository for the trainer you were using.
 - **Report a vulnerability.** Do not open a public issue. Follow
   [SECURITY.md](SECURITY.md).
 - **Write code.** Bug fixes and small, self-contained features are welcome.
   For anything large, open an issue first so we can agree on the shape before
-  you spend the time. Remember that everything here ships verbatim to five
+  you spend the time. Remember that everything here ships verbatim to six
   apps, so a change has to make sense for all of them.
 
 ## Getting set up

@@ -15,7 +15,7 @@ through each app's normal release process.
 ## Supported versions
 
 Only the latest release is supported. This repository ships no site of its
-own: everything in [`MANIFEST`](MANIFEST) is synced into the five exam
+own: everything in [`MANIFEST`](MANIFEST) is synced into the six exam
 trainer apps (epa, faa-drone, fcc-commercial, nc-cdl, nc-pesticide) when a
 release is cut, and deploys to their live sites through their release
 pipelines.
@@ -23,11 +23,11 @@ There are no maintained older branches.
 
 ## Scope
 
-This is the shared engine for five static, dependency-free web apps. There is
+This is the shared engine for six static, dependency-free web apps. There is
 no server and no account system; all user progress lives in the browser's own
 localStorage and the optional export file the user saves themselves.
 
-Because these files fan out to every trainer, a flaw here affects all five
+Because these files fan out to every trainer, a flaw here affects all six
 live sites at once. Reports that are in scope include:
 
 - Cross-site scripting through rendered content. The engine builds its DOM

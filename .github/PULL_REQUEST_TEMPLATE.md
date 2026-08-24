@@ -25,5 +25,5 @@
       per idea
 - [ ] No new runtime dependencies and no build step
 - [ ] The change works for every app, not just the one it was written against.
-      Everything in `MANIFEST` ships verbatim to all five trainers
+      Everything in `MANIFEST` ships verbatim to all six trainers
 - [ ] User-visible changes work on a phone
