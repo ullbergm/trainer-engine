@@ -14,7 +14,7 @@ body:
     attributes:
       label: Which trainer
       description: The app where you saw it, or "engine checkout" if you were working here.
-      placeholder: faa-drone, fcc-commercial, nc-cdl, nc-pesticide
+      placeholder: epa, faa-drone, fcc-commercial, nc-cdl, nc-pesticide
   - type: input
     id: browser
     attributes:
