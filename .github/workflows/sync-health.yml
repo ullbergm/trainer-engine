@@ -1,0 +1,78 @@
+# Weekly report on how far each app repo lags the engine. The sync workflow
+# opens auto-merging PRs, so in the healthy steady state every app carries the
+# latest engine release and this job is green and silent. It goes red when a
+# sync PR has been sitting open for more than a week (its CI is failing, or
+# auto-merge is off) or when an app lags the latest release with no sync PR
+# open at all (the PR was closed by hand, or the sync never ran). A failing
+# scheduled run emails the repo owner, which is the notification.
+#
+# Engine-repo only; not part of MANIFEST.
+name: sync-health
+
+on:
+  schedule:
+    - cron: '43 7 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Compare each app's ENGINE_VERSION to the latest release
+        env:
+          # The default token reads the public app repos fine; SYNC_TOKEN is
+          # only preferred so a private fork of this setup keeps working.
+          GH_TOKEN: ${{ secrets.SYNC_TOKEN || github.token }}
+          MAX_PR_AGE_DAYS: '7'
+        run: |
+          set -euo pipefail
+          owner="${GITHUB_REPOSITORY%%/*}"
+          apps="faa-drone-trainer fcc-commercial-trainer nc-cdl-trainer nc-pesticide-trainer"
+          latest=$(gh api "repos/$owner/trainer-engine/releases/latest" --jq .tag_name)
+          latest="${latest#v}"
+          now=$(date +%s)
+          fail=0
+          {
+            echo "### Engine sync health"
+            echo
+            echo "Latest engine release: **v$latest**"
+            echo
+            echo '| app | engine | open sync PR | status |'
+            echo '| --- | --- | --- | --- |'
+          } >> "$GITHUB_STEP_SUMMARY"
+          for app in $apps; do
+            current=$(gh api -H 'Accept: application/vnd.github.raw' \
+              "repos/$owner/$app/contents/ENGINE_VERSION" 2>/dev/null | tr -d '\n' || true)
+            pr=$(gh pr list --repo "$owner/$app" --head engine-sync --state open \
+              --json number,url,createdAt --jq '.[0] // empty')
+            prcell='—'
+            status='current'
+            if [ -n "$pr" ]; then
+              url=$(jq -r .url <<<"$pr")
+              num=$(jq -r .number <<<"$pr")
+              created=$(jq -r .createdAt <<<"$pr")
+              age=$(( (now - $(date -d "$created" +%s)) / 86400 ))
+              prcell="[#$num]($url), ${age}d old"
+              if [ "$age" -gt "$MAX_PR_AGE_DAYS" ]; then
+                status="STUCK: sync PR open ${age}d, check its CI"
+                fail=1
+              else
+                status='sync in flight'
+              fi
+            elif [ -z "$current" ]; then
+              # No stamp yet: the app has not received a sync since
+              # ENGINE_VERSION was added. Informational, not a failure.
+              status='unstamped (pre-ENGINE_VERSION)'
+            elif [ "$current" != "$latest" ]; then
+              status="LAGGING: no sync PR open"
+              fail=1
+            fi
+            echo "| $app | ${current:-?} | $prcell | $status |" >> "$GITHUB_STEP_SUMMARY"
+          done
+          if [ "$fail" -ne 0 ]; then
+            echo '::error::At least one app lags the engine; see the run summary.'
+            exit 1
+          fi

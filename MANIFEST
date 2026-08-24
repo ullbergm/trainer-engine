@@ -3,9 +3,12 @@
 # files must not be edited (the engine-guard workflow fails a PR that tries);
 # change them in the engine repo, whose sync workflow copies exactly this
 # list. A file an app owns (index.html, css/app.css, data/*, tests/test.html,
-# tests/app-suite.js, eslint.config.mjs, package.json) is never listed here.
+# tests/app-suite.js, tests/screenshots/*, eslint.config.mjs, package.json)
+# is never listed here.
 MANIFEST
+ENGINE_VERSION
 .github/workflows/engine-guard.yml
+.githooks/commit-msg
 js/app.js
 js/fsrs.js
 js/readiness.js
@@ -18,4 +21,9 @@ tests/readiness-test.js
 tests/plant-session.js
 tests/engine-suite.js
 tests/run-browser.sh
+tests/serve.mjs
+tests/playwright.config.mjs
+tests/browser.spec.mjs
+.lighthouserc.json
 tools/gen-icons.sh
+tools/stage-site.sh

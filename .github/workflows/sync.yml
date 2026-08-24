@@ -70,6 +70,17 @@ jobs:
             cp "$f" "../app/$f"
           done
 
+      # The engine's own copy of ENGINE_VERSION says "dev"; the app copy
+      # records the release actually synced, so the sync-health workflow (and
+      # anyone reading the repo) can see which engine each app is running
+      # without digging through sync commits.
+      - name: Stamp ENGINE_VERSION
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          ref="${VERSION:-$GITHUB_SHA}"
+          echo "${ref#v}" > app/ENGINE_VERSION
+
       - name: Compose the sync message
         id: notes
         env:

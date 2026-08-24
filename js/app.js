@@ -158,10 +158,15 @@
   };
 
   // Choices like "All of the above" refer to the other choices by position,
-  // so they must stay below them no matter how the rest are shuffled.
+  // so they must stay below them no matter how the rest are shuffled. A
+  // two-choice question (true/false, yes/no) reads in its written order:
+  // shuffling "False" above "True" helps nobody, and with the whole bank
+  // shuffle-free there is no position pattern to exploit.
   const POSITIONAL = /^(all|none|any|both) of (the above|these)/i;
   const choiceOrder = q => {
-    const order = shuffle([0, 1, 2, 3]);
+    const indices = q.choices.map((_, i) => i);
+    if (indices.length <= 2) return indices;
+    const order = shuffle(indices);
     return order.filter(i => !POSITIONAL.test(q.choices[i]))
       .concat(order.filter(i => POSITIONAL.test(q.choices[i])));
   };
@@ -683,6 +688,14 @@
     return Calculator.html(Store.load().settings.calcOpen === true);
   }
 
+  // A question may carry an illustration (q.image: {src, alt}) — a table or
+  // figure from the manual that the question is posed against. It renders
+  // between the stem and the choices, in study and exam alike.
+  function imageFor(q) {
+    if (!q.image) return '';
+    return `<img class="qimage" src="${esc(q.image.src)}" alt="${esc(q.image.alt)}">`;
+  }
+
   function wireCalculator() {
     if (!view.querySelector('#calc')) return;
     Calculator.wire(view, open => {
@@ -719,6 +732,7 @@
           aria-valuemin="0" aria-valuemax="${expected}" aria-valuenow="${answered}">
           <div style="width:${(answered / expected) * 100}%"></div></div>
         <h2 class="qtext" tabindex="-1">${esc(q.question)}</h2>
+        ${imageFor(q)}
         <div class="choices">
           ${order.map((i, k) => `<button class="choice" data-i="${i}"><kbd>${k + 1}</kbd>${esc(q.choices[i])}</button>`).join('')}
         </div>
@@ -950,6 +964,7 @@
           aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${session.pos}">
           <div style="width:${(session.pos / total) * 100}%"></div></div>
         <h2 class="qtext" tabindex="-1">${esc(q.question)}</h2>
+        ${imageFor(q)}
         <div class="choices">
           ${order.map((i, k) => `<button class="choice" data-i="${i}"><kbd>${k + 1}</kbd>${esc(q.choices[i])}</button>`).join('')}
         </div>
@@ -1495,11 +1510,19 @@
         <h3>Changelog${appVersion ? ` <small>current: v${appVersion}</small>` : ''}</h3>
         <div id="changelog" class="changelog"><p class="hint">Loading changelog...</p></div>
       </div>`;
+    // The reader may have left About before the fetch settles, taking
+    // #changelog with it; a settled fetch with nowhere to render is not an
+    // error, so both handlers tolerate the missing element.
     fetch('CHANGELOG.md')
       .then(r => (r.ok ? r.text() : Promise.reject(new Error(r.status))))
-      .then(md => { $('#changelog').innerHTML = changelogHTML(md); })
+      .then(md => {
+        const el = $('#changelog');
+        if (el) el.innerHTML = changelogHTML(md);
+      })
       .catch(() => {
-        $('#changelog').innerHTML = `<p class="hint">The changelog could not be loaded.
+        const el = $('#changelog');
+        if (!el) return;
+        el.innerHTML = `<p class="hint">The changelog could not be loaded.
           See the <a href="${CFG.repo}/releases" target="_blank" rel="noopener">releases
           page on GitHub</a>.</p>`;
       });

@@ -165,10 +165,10 @@ button.danger { border-color: var(--bad); color: var(--bad); background: transpa
 /* progress: the app's optional --track-texture over the dark track, plus an
    optional --track-marker (an emoji string or a url() image) that rides the
    leading edge of the fill. Both fall back to a plain bar when unset. The
-   marker overhangs the 10px track on purpose, so the track cannot clip
+   marker may overhang the track on purpose, so the track cannot clip
    (no overflow: hidden); the fill carries its own radius instead. */
 .progress {
-  height: 10px;
+  height: 20px;
   border-radius: 6px;
   /* Apps that set a --track-marker also reserve its footprint (marker width
      plus the 3px gap) as --track-marker-clearance, so the marker still fits
@@ -210,6 +210,18 @@ button.danger { border-color: var(--bad); color: var(--bad); background: transpa
 }
 
 .qtext { font-size: 1.2rem; line-height: 1.4; }
+/* Optional illustration a question carries (q.image). Boxed on white even in
+   dark mode: the artwork comes from manuals that assume a white page, so
+   letting it sit on the dark card would make its black lines vanish. */
+.qimage {
+  display: block;
+  max-width: 100%;
+  margin: 4px 0 10px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+}
 .choices { display: grid; gap: 8px; }
 .choice {
   font: inherit;
