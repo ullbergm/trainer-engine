@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.0](https://github.com/ullbergm/trainer-engine/compare/v2.2.0...v2.3.0) (2026-08-28)
+
+
+### Features
+
+* let a config name the tests a fresh install starts on ([1db6c2b](https://github.com/ullbergm/trainer-engine/commit/1db6c2be29a3e736f42119b94ba5cc61d2965917))
+
 ## [2.2.0](https://github.com/ullbergm/trainer-engine/compare/v2.1.1...v2.2.0) (2026-08-24)
 
 
