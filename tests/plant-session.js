@@ -3,6 +3,12 @@
  * asserts on the result, then navigates away and starts clean.
  * Synced from the trainer-engine repo; do not edit in an app repo. */
 localStorage.clear();
+// The suite's early checks assume the everything-selection, which a config
+// naming starter tests for fresh installs (EXAM_CONFIG.defaultTests) would
+// otherwise narrow. Plant the selection explicitly; the fresh-install
+// default has its own check in the suite, reached through Store.reset().
+localStorage.setItem(EXAM_CONFIG.storageKey,
+  JSON.stringify({ cards: {}, settings: { tests: [] } }));
 // The resumed question is one with an "All of the above" choice, so the
 // resume assertions double as a check that positional choices render last.
 // A bank without one falls back to an ordinary question and that check is

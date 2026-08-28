@@ -433,6 +433,19 @@ const TestSuite = (() => {
     t('a migrated selection covers the exam\'s sections as they are now',
       oldTest.sections.every(sec => statsText.includes(secName(sec))));
 
+    // --- a fresh install starts on the configured starter tests ---
+    // defaults() is only reachable with no saved state, which reset()
+    // recreates: without EXAM_CONFIG.defaultTests the selection is empty
+    // (= all of them); with it, a new user's picker comes pre-checked with
+    // the starter exams, while anyone already studying keeps their choice
+    // (the sanitize tests above never saw starter tests leak in).
+    Store.reset();
+    const starter = [...new Set((EXAM_CONFIG.defaultTests || [])
+      .filter(k => STUDIABLE.some(tst => tst.key === k)))].sort();
+    const fresh = [...Store.load().settings.tests].sort();
+    t('fresh state starts on the configured starter tests', JSON.stringify(fresh)
+      === JSON.stringify(starter.length === STUDIABLE.length ? [] : starter));
+
     Store.importJSON(dump); // restore real state for the remaining tests
 
     // --- the practice pool always empties ---

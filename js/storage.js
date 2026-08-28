@@ -12,7 +12,7 @@ const Store = (() => {
     cards: {},          // id -> {stability, difficulty, due, lastReview, reps, lapses, state, wrong, right, streak}
     settings: {
       newPerDay: 10,   // relaxed steady pace; auto-boosted when an exam date demands it
-      tests: [],        // exam keys being studied for; empty = all of them
+      tests: [...STARTER_TESTS], // exam keys being studied for; empty = all of them
       examDate: '',     // 'YYYY-MM-DD'; drives retention ramp + final review
       theme: 'system',  // 'system' | 'light' | 'dark'
       // Whether the on-screen calculator starts open on a question that
@@ -52,6 +52,18 @@ const Store = (() => {
   const TESTS = (EXAM_CONFIG.tests || [])
     .map(t => ({ ...t, sections: (t.sections || []).map(normSec) }))
     .filter(t => t.sections.length);
+  // What a fresh install studies. A config may name starter tests
+  // (EXAM_CONFIG.defaultTests) so a new user's queue begins with the exams
+  // most people sit first instead of the whole bank; the picker still offers
+  // everything, and anyone with saved progress keeps their own selection.
+  // Unknown keys are dropped, so a config typo falls back toward "all of
+  // them" rather than pinning a new user to nothing, and naming every test
+  // collapses to the same empty list the picker stores for that choice.
+  const STARTER_TESTS = (() => {
+    const keys = [...new Set((EXAM_CONFIG.defaultTests || [])
+      .filter(k => TESTS.some(t => t.key === k)))];
+    return keys.length === TESTS.length ? [] : keys;
+  })();
   function chosenTests(st) {
     const keys = Array.isArray(st.tests)
       ? st.tests.filter(k => TESTS.some(t => t.key === k))
