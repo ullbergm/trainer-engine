@@ -109,6 +109,12 @@ exactly the files in `MANIFEST`. Each app's own CI (bank validation, unit
 tests, browser suite) runs on that pull request before it can merge, and the
 change only reaches a live site through that app's next release.
 
+Dependabot's pull requests need no hand-merging. The `dependabot-automerge`
+workflow, synced to every app, enables auto-merge on each one, so a version
+bump lands once the required checks pass and waits for a person only when a
+check fails. The bumps are `chore` commits, so they ride along in the next
+release rather than causing one.
+
 ## Documentation and copy
 
 Plain, direct prose. No emoji, no marketing voice, and no em dashes. Match

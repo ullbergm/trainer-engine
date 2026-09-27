@@ -1,0 +1,41 @@
+# Enables auto-merge on every pull request Dependabot opens, so a version bump
+# lands on its own once this repo's required checks pass and stays open for a
+# human only when one fails. Nothing merges here: GitHub performs the merge
+# when the protect-main ruleset is satisfied (CI, engine-guard, commit
+# conventions), so the job first checks that the base branch really has
+# required status checks; without them GitHub would merge at once, before CI
+# has run, and the job fails instead.
+#
+# Uses the default token because a Dependabot-triggered workflow cannot read
+# repository secrets. A merge made by that token does not fire push workflows,
+# which is fine: Dependabot only writes `chore` commits, which never cut a
+# release on their own, and the next Release run on main picks them up.
+# Synced from the trainer-engine repo; do not edit in an app repo.
+name: dependabot-automerge
+
+on:
+  pull_request:
+    types: [opened, reopened]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  enable:
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enable auto-merge once the required checks pass
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          BASE: ${{ github.event.pull_request.base.ref }}
+        run: |
+          set -euo pipefail
+          if ! gh api "repos/$GITHUB_REPOSITORY/rules/branches/$BASE" --jq '.[].type' \
+              | grep -qx required_status_checks; then
+            echo "::error::$BASE has no required status checks, so auto-merge would merge before CI runs. Add the protect-main ruleset first."
+            exit 1
+          fi
+          gh pr merge --merge --auto "$PR" --repo "$GITHUB_REPOSITORY"

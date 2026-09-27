@@ -8,6 +8,8 @@
 MANIFEST
 ENGINE_VERSION
 .github/workflows/engine-guard.yml
+.github/workflows/dependabot-automerge.yml
+.github/dependabot.yml
 .githooks/commit-msg
 js/app.js
 js/fsrs.js
