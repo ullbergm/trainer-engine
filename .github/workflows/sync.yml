@@ -17,7 +17,8 @@
 # Needs a classic PAT with `repo` and `workflow` scope saved as the
 # SYNC_TOKEN secret: `repo` so the pushed branches trigger the app repos'
 # workflows (the default GITHUB_TOKEN cannot reach other repos), `workflow`
-# because the manifest includes .github/workflows/engine-guard.yml.
+# because the manifest includes files under .github/workflows/ (engine-guard
+# and dependabot-automerge).
 name: sync-apps
 
 on:

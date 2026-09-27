@@ -30,7 +30,9 @@ verbatim into every app repo by the sync workflow, which opens a PR per app
 so each app's own CI gates the update. The manifest also syncs itself and an
 `engine-guard` workflow, so a pull request in an app repo that edits a synced
 file fails CI with a pointer back here (the sync PRs, on the `engine-sync`
-branch, are exempt).
+branch, are exempt). The Dependabot config and a `dependabot-automerge`
+workflow are synced too, so a dependency bump in any repo merges on its own
+once that repo's CI is green.
 
 ## What an app owns
 
