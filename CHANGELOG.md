@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.1](https://github.com/ullbergm/trainer-engine/compare/v2.3.0...v2.3.1) (2026-09-27)
+
+
+### Bug Fixes
+
+* let Dependabot bumps merge on their own once CI passes ([d6fbf35](https://github.com/ullbergm/trainer-engine/commit/d6fbf35e67b49b9ca0cf091050ade3d3e4915ead))
+
 ## [2.3.0](https://github.com/ullbergm/trainer-engine/compare/v2.2.0...v2.3.0) (2026-08-28)
 
 
